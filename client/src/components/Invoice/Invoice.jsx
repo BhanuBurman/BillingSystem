@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Invoice.scss';
 import { auth, onAuthStateChanged } from '../../firebase';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const Invoice = () => {
   const [loading, setLoading] = useState(false);
@@ -54,18 +56,32 @@ const Invoice = () => {
     }
   };
 
+  const handleDownloadInvoice = () => {
+    const input = document.getElementById('invoice-content');
+    html2canvas(input)
+      .then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF();
+        pdf.addImage(imgData, 'PNG', 0, 0);
+        pdf.save('invoice.pdf');
+      })
+      .catch((error) => {
+        console.error('Error generating PDF:', error);
+      });
+  };
+
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
   return (
     <div className="app__invoice">
-      <h1>Invoice</h1>
+      <h1>Click below to generate the invoice</h1>
       <button className="generate-invoice-button" onClick={handleGenerateInvoice}>
         Generate Invoice
       </button>
       {invoiceData && (
-        <div className="invoice-content">
+        <div className="invoice-content" id="invoice-content">
           <table>
             <tbody>
               <tr>
@@ -90,7 +106,7 @@ const Invoice = () => {
               </tr>
               <tr>
                 <td><strong>Storage:</strong></td>
-                <td>{invoiceData.additionalAssets} GB</td>
+                <td>{invoiceData.totalAssets} GB</td>
               </tr>
               <tr>
                 <td><strong>Purchase Date:</strong></td>
@@ -111,6 +127,11 @@ const Invoice = () => {
             </tbody>
           </table>
         </div>
+      )}
+      {invoiceData && (
+        <button className="download-invoice-button" onClick={handleDownloadInvoice}>
+          Download Invoice
+        </button>
       )}
     </div>
   );
