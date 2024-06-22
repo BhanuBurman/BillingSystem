@@ -30,6 +30,7 @@ mongoose.connect(mongoDBURI, {
 
 // Define routes
 app.use('/user', userRoute);
+  
 
 app.get('/', (req, res) => {
     res.send('Hello! I am Bhanu Kumar Burman.');

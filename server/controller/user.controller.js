@@ -2,8 +2,11 @@ import User from '../models/users.model.js';
 
 export const getUser = async (req, res) => {
     try {
-        const { firebaseId } = req.params; // Use req.params instead of req.body
+        console.log("Started getting user...");
+        const { firebaseId } = req.params;
+        console.log("firebaseId: " + firebaseId);
         const user = await User.findOne({ firebaseId });
+        console.log("user: " + user);
         if (user) {
             return res.status(200).json(user);
         } else {
@@ -15,60 +18,49 @@ export const getUser = async (req, res) => {
     }
 };
 
-
 export const addUser = async (req, res) => {
     try {
-        console.log(req);
-        const { userId, name, planType, totalAssets, purchaseDate, usedAssets } = req.body;
-
-        // Check if the user already exists
-        const existingUser = await User.findOne({ firebaseId: userId });
-        if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
-
-        const newUser = new User({
-            firebaseId: userId,
-            name:name,
-            planType:planType,
-            totalAssets:totalAssets,
-            purchaseDate:purchaseDate,
-            usedAssets:usedAssets,
-            // profilePicture: req.body.profilePicture, // Uncomment if using profilePicture
-        });
+        const { userId, name, planType, additionalAssets, purchaseDate, usedAssets } = req.body;
         
-        const savedUser = await newUser.save();
-        return res.status(201).json(savedUser);
-    } catch (err) {
-        console.error("Error: " + err);
-        return res.status(500).json({ message: 'Internal server error', error: err });
-    }
-};
+        // Check if the user already exists
+        let user = await User.findOne({ firebaseId: userId });
 
-export const addAsset = async (req, res) => {
-    try {
-        const { userId, planType, additionalAssets, purchaseDate } = req.body;
-
-        const updatedUser = await User.findOneAndUpdate(
-            { firebaseId: userId },
-            {
-                $set: {
-                    planType: planType,
-                    purchaseDate: purchaseDate
+        if (user) {
+            // Update existing user
+            const updatedUser = await User.findOneAndUpdate(
+                { firebaseId: userId },
+                {
+                    $set: {
+                        planType: planType,
+                        purchaseDate: purchaseDate
+                    },
+                    $inc: {
+                        totalAssets: additionalAssets
+                    },
+                    $currentDate: { updatedAt: true }
                 },
-                $inc: {
-                    totalAssets: additionalAssets
-                },
-                $currentDate: { updatedAt: true }
-            },
-            { new: true }
-        );
+                { new: true }
+            );
 
-        if (!updatedUser) {
-            return res.status(404).json({ message: 'User not found' });
+            if (!updatedUser) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            return res.status(200).json(updatedUser);
+        } else {
+            // Create new user
+            const newUser = new User({
+                firebaseId: userId,
+                name: name,
+                planType: planType,
+                totalAssets: additionalAssets,
+                purchaseDate: purchaseDate,
+                usedAssets: usedAssets,
+            });
+
+            const savedUser = await newUser.save();
+            return res.status(201).json(savedUser);
         }
-
-        return res.status(200).json(updatedUser);
     } catch (err) {
         console.error("Error: " + err);
         return res.status(500).json({ message: 'Internal server error', error: err });

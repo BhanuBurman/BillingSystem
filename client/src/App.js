@@ -4,6 +4,7 @@ import NavBar from './components/NavBar/NavBar';
 import SideNavBar from './components/SideNavBar/SideNavBar';
 import DashBoard from './components/DashBoard/DashBoard';
 import Payment from './components/Payment/Payment';
+import Invoice from './components/Invoice/Invoice';
 // import HomePage from './pages/HomePage';
 // import ProfilePage from './pages/ProfilePage';
 // import SettingsPage from './pages/SettingsPage';
@@ -21,6 +22,7 @@ const App = () => {
             {/* <Route path="/" element={<HomePage />} /> */}
             <Route path="/dashboard" element={<DashBoard />} />
             <Route path="/payment" element={<Payment />} />
+            <Route path="/invoice" element={<Invoice />} />
           </Routes>
         </div>
       </div>

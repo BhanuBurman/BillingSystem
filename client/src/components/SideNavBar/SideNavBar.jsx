@@ -34,6 +34,11 @@ const SideNavBar = ({ setCurrentPage }) => {
               Settings
             </NavLink>
           </li>
+          <li>
+            <NavLink to="/invoice" activeClassName="active" onClick={() => handleNavClick('Invoice')}>
+              Invoice
+            </NavLink>
+          </li>
         </ul>
       </nav>
     </div>
