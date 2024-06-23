@@ -22,11 +22,9 @@ export const addUser = async (req, res) => {
     try {
         const { userId, name, planType, additionalAssets, purchaseDate, usedAssets } = req.body;
         
-        // Check if the user already exists
         let user = await User.findOne({ firebaseId: userId });
 
         if (user) {
-            // Update existing user
             const updatedUser = await User.findOneAndUpdate(
                 { firebaseId: userId },
                 {
@@ -48,7 +46,6 @@ export const addUser = async (req, res) => {
 
             return res.status(200).json(updatedUser);
         } else {
-            // Create new user
             const newUser = new User({
                 firebaseId: userId,
                 name: name,
@@ -70,6 +67,10 @@ export const addUser = async (req, res) => {
 export const updateAssets = async (req, res) => {
     try {
         const { userId, additionalUsedAssets } = req.body;
+
+        if (!additionalUsedAssets) {
+            return res.status(400).json({ message: 'additionalUsedAssets is required' });
+        }
 
         const updatedUser = await User.findOneAndUpdate(
             { firebaseId: userId },
